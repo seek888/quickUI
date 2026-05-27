@@ -64,9 +64,14 @@ jobs:
       - name: Build release APK
         run: flutter build apk --release
 
+      - name: Show APK output
+        run: ls -lh build/app/outputs/flutter-apk/app-release.apk
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: quick-ui-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
+          retention-days: 1

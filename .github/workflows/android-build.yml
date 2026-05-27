@@ -40,12 +40,33 @@ jobs:
       - name: Test
         run: flutter test
 
-      - name: Build debug APK
-        run: flutter build apk --debug
+      - name: Create demo release keystore
+        working-directory: android
+        run: |
+          keytool -genkeypair \
+            -v \
+            -keystore app/quickui-demo-release.jks \
+            -storetype JKS \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -alias quickui_demo \
+            -storepass quickui123 \
+            -keypass quickui123 \
+            -dname "CN=QuickUI Demo, OU=Demo, O=QuickUI, L=Shanghai, ST=Shanghai, C=CN"
+          cat > key.properties <<'EOF'
+          storeFile=app/quickui-demo-release.jks
+          storePassword=quickui123
+          keyAlias=quickui_demo
+          keyPassword=quickui123
+          EOF
+
+      - name: Build release APK
+        run: flutter build apk --release
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: quick-ui-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
+          name: quick-ui-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error

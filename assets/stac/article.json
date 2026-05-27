@@ -1,0 +1,199 @@
+{
+  "type": "singleChildScrollView",
+  "child": {
+    "type": "container",
+    "padding": 12,
+    "child": {
+      "type": "column",
+      "crossAxisAlignment": "start",
+      "children": [
+        {
+          "type": "container",
+          "height": 170,
+          "alignment": "bottomLeft",
+          "padding": 16,
+          "decoration": {
+            "color": "#FF1E293B",
+            "borderRadius": 8
+          },
+          "child": {
+            "type": "column",
+            "mainAxisAlignment": "end",
+            "crossAxisAlignment": "start",
+            "children": [
+              {
+                "type": "text",
+                "data": "专题 · 动态文章页",
+                "style": {
+                  "fontSize": 13,
+                  "color": "#FFBAE6FD"
+                }
+              },
+              {
+                "type": "sizedBox",
+                "height": 8
+              },
+              {
+                "type": "text",
+                "data": "如何把社交客户端开放成能力平台",
+                "style": {
+                  "fontSize": 24,
+                  "height": 1.18,
+                  "fontWeight": "bold",
+                  "color": "#FFFFFFFF"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 14
+        },
+        {
+          "type": "text",
+          "data": "这类页面适合通过 Stac 配置快速发布：运营专题、公告、活动详情、创作者教程、榜单解释页。核心客户端仍然控制账号、IM、支付、权限和安全边界。",
+          "style": {
+            "fontSize": 16,
+            "height": 1.55,
+            "color": "#FF1F2937"
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 16
+        },
+        {
+          "type": "card",
+          "shape": {
+            "type": "roundedRectangleBorder",
+            "borderRadius": 8
+          },
+          "child": {
+            "type": "container",
+            "padding": 14,
+            "child": {
+              "type": "column",
+              "crossAxisAlignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "data": "能力分层",
+                  "style": {
+                    "fontSize": 17,
+                    "fontWeight": "bold",
+                    "color": "#FF111827"
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 10
+                },
+                {
+                  "type": "text",
+                  "data": "1. Stac JSON 负责页面布局和普通交互\n2. Custom Action 负责调用客户端能力\n3. Permission Broker 控制敏感能力授权\n4. 配置包通过签名、缓存、灰度和回滚保障安全",
+                  "style": {
+                    "fontSize": 14,
+                    "height": 1.55,
+                    "color": "#FF334155"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 16
+        },
+        {
+          "type": "row",
+          "children": [
+            {
+              "type": "expanded",
+              "child": {
+                "type": "outlinedButton",
+                "onPressed": {
+                  "actionType": "platform",
+                  "capability": "openChat",
+                  "title": "咨询作者",
+                  "payload": {
+                    "authorId": "author_platform",
+                    "scene": "article"
+                  }
+                },
+                "child": {
+                  "type": "text",
+                  "data": "咨询作者"
+                }
+              }
+            },
+            {
+              "type": "sizedBox",
+              "width": 10
+            },
+            {
+              "type": "expanded",
+              "child": {
+                "type": "filledButton",
+                "onPressed": {
+                  "actionType": "platform",
+                  "capability": "shareArticle",
+                  "title": "分享专题",
+                  "payload": {
+                    "articleId": "article_platform_001",
+                    "title": "如何把社交客户端开放成能力平台"
+                  }
+                },
+                "child": {
+                  "type": "text",
+                  "data": "分享专题"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "sizedBox",
+          "height": 18
+        },
+        {
+          "type": "text",
+          "data": "相关推荐",
+          "style": {
+            "fontSize": 18,
+            "fontWeight": "bold",
+            "color": "#FF111827"
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 10
+        },
+        {
+          "type": "card",
+          "shape": {
+            "type": "roundedRectangleBorder",
+            "borderRadius": 8
+          },
+          "child": {
+            "type": "listTile",
+            "leading": {
+              "type": "icon",
+              "icon": "widgets_outlined",
+              "color": "#FF0F766E"
+            },
+            "title": {
+              "type": "text",
+              "data": "动态页面组件规范"
+            },
+            "subtitle": {
+              "type": "text",
+              "data": "组件、数据源、动作和权限的协议设计"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

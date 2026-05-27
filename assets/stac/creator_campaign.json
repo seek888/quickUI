@@ -1,0 +1,94 @@
+{
+  "type": "listView",
+  "padding": 12,
+  "children": [
+    {
+      "type": "container",
+      "padding": 18,
+      "decoration": {
+        "color": "#FF92400E",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "text",
+        "data": "活动配置工作台",
+        "style": {
+          "fontSize": 24,
+          "fontWeight": "bold",
+          "color": "#FFFFFFFF"
+        }
+      }
+    },
+    {
+      "type": "sizedBox",
+      "height": 12
+    },
+    {
+      "type": "card",
+      "shape": {
+        "type": "roundedRectangleBorder",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "container",
+        "padding": 14,
+        "child": {
+          "type": "column",
+          "crossAxisAlignment": "start",
+          "children": [
+            {
+              "type": "text",
+              "data": "配置活动入口",
+              "style": {
+                "fontSize": 18,
+                "fontWeight": "bold"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "textField",
+              "decoration": {
+                "labelText": "入口标题",
+                "hintText": "例如：春季创作挑战"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "textField",
+              "maxLines": 2,
+              "decoration": {
+                "labelText": "分享文案",
+                "hintText": "用户分享到会话时看到的说明"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "filledButton",
+              "onPressed": {
+                "actionType": "platform",
+                "capability": "submitForm",
+                "title": "保存活动配置",
+                "payload": {
+                  "formId": "campaign_builder"
+                }
+              },
+              "child": {
+                "type": "text",
+                "data": "保存活动"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

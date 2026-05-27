@@ -1,0 +1,271 @@
+{
+  "type": "listView",
+  "padding": 12,
+  "children": [
+    {
+      "type": "container",
+      "padding": 16,
+      "decoration": {
+        "color": "#FF0F766E",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "column",
+        "crossAxisAlignment": "start",
+        "children": [
+          {
+            "type": "text",
+            "data": "社区精选配置包",
+            "style": {
+              "fontSize": 22,
+              "fontWeight": "bold",
+              "color": "#FFFFFFFF"
+            }
+          },
+          {
+            "type": "sizedBox",
+            "height": 8
+          },
+          {
+            "type": "text",
+            "data": "这个页面由 assets/stac/feed.json 渲染。后台只需要下发同样结构的 JSON，就能改变列表、入口和动作。",
+            "style": {
+              "fontSize": 14,
+              "height": 1.4,
+              "color": "#FFE0F2F1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "sizedBox",
+      "height": 12
+    },
+    {
+      "type": "card",
+      "elevation": 0,
+      "shape": {
+        "type": "roundedRectangleBorder",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "container",
+        "padding": 14,
+        "child": {
+          "type": "column",
+          "crossAxisAlignment": "start",
+          "children": [
+            {
+              "type": "row",
+              "children": [
+                {
+                  "type": "circleAvatar",
+                  "radius": 18,
+                  "backgroundColor": "#FFDBEAFE",
+                  "child": {
+                    "type": "text",
+                    "data": "林",
+                    "style": {
+                      "fontWeight": "bold",
+                      "color": "#FF1D4ED8"
+                    }
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "width": 10
+                },
+                {
+                  "type": "expanded",
+                  "child": {
+                    "type": "column",
+                    "crossAxisAlignment": "start",
+                    "children": [
+                      {
+                        "type": "text",
+                        "data": "林川 · 产品设计师",
+                        "style": {
+                          "fontWeight": "bold",
+                          "fontSize": 15,
+                          "color": "#FF111827"
+                        }
+                      },
+                      {
+                        "type": "text",
+                        "data": "2 分钟前 · 动态页面示例",
+                        "style": {
+                          "fontSize": 12,
+                          "color": "#FF64748B"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ]
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "text",
+              "data": "用配置描述 feed 卡片，可以快速接入活动、投票、专题、作者推荐和 IM 分享入口。",
+              "style": {
+                "fontSize": 15,
+                "height": 1.45,
+                "color": "#FF1F2937"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "container",
+              "height": 112,
+              "alignment": "center",
+              "decoration": {
+                "color": "#FFF1F5F9",
+                "borderRadius": 8
+              },
+              "child": {
+                "type": "text",
+                "data": "动态内容组件区域",
+                "style": {
+                  "fontSize": 16,
+                  "fontWeight": "w600",
+                  "color": "#FF334155"
+                }
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "row",
+              "mainAxisAlignment": "spaceBetween",
+              "children": [
+                {
+                  "type": "textButton",
+                  "onPressed": {
+                    "actionType": "platform",
+                    "capability": "followAuthor",
+                    "message": "已关注林川"
+                  },
+                  "child": {
+                    "type": "text",
+                    "data": "关注"
+                  }
+                },
+                {
+                  "type": "textButton",
+                  "onPressed": {
+                    "actionType": "platform",
+                    "capability": "openChat",
+                    "title": "打开私信",
+                    "message": "客户端接管 IM 能力，配置只传入目标用户和来源。",
+                    "payload": {
+                      "targetUserId": "u_10001",
+                      "source": "feed_card"
+                    }
+                  },
+                  "child": {
+                    "type": "text",
+                    "data": "私信"
+                  }
+                },
+                {
+                  "type": "filledButton",
+                  "onPressed": {
+                    "actionType": "platform",
+                    "capability": "shareArticle",
+                    "title": "分享到会话",
+                    "payload": {
+                      "contentId": "post_2401",
+                      "cardType": "post"
+                    }
+                  },
+                  "child": {
+                    "type": "text",
+                    "data": "分享"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "sizedBox",
+      "height": 12
+    },
+    {
+      "type": "card",
+      "shape": {
+        "type": "roundedRectangleBorder",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "container",
+        "padding": 14,
+        "child": {
+          "type": "column",
+          "crossAxisAlignment": "start",
+          "children": [
+            {
+              "type": "text",
+              "data": "开放能力看板",
+              "style": {
+                "fontSize": 17,
+                "fontWeight": "bold",
+                "color": "#FF111827"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 10
+            },
+            {
+              "type": "wrap",
+              "spacing": 8,
+              "runSpacing": 8,
+              "children": [
+                {
+                  "type": "chip",
+                  "label": {
+                    "type": "text",
+                    "data": "文章卡片"
+                  }
+                },
+                {
+                  "type": "chip",
+                  "label": {
+                    "type": "text",
+                    "data": "评论入口"
+                  }
+                },
+                {
+                  "type": "chip",
+                  "label": {
+                    "type": "text",
+                    "data": "IM 分享"
+                  }
+                },
+                {
+                  "type": "chip",
+                  "label": {
+                    "type": "text",
+                    "data": "埋点上报"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

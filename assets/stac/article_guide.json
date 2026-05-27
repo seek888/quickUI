@@ -1,0 +1,105 @@
+{
+  "type": "singleChildScrollView",
+  "child": {
+    "type": "container",
+    "padding": 12,
+    "child": {
+      "type": "column",
+      "crossAxisAlignment": "start",
+      "children": [
+        {
+          "type": "container",
+          "padding": 18,
+          "decoration": {
+            "color": "#FF064E3B",
+            "borderRadius": 8
+          },
+          "child": {
+            "type": "column",
+            "crossAxisAlignment": "start",
+            "children": [
+              {
+                "type": "text",
+                "data": "发布指南",
+                "style": {
+                  "fontSize": 26,
+                  "fontWeight": "bold",
+                  "color": "#FFFFFFFF"
+                }
+              },
+              {
+                "type": "sizedBox",
+                "height": 8
+              },
+              {
+                "type": "text",
+                "data": "一套完全不同的文章配置，用来展示专题页下载后的替换效果。",
+                "style": {
+                  "fontSize": 14,
+                  "height": 1.45,
+                  "color": "#FFA7F3D0"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 14
+        },
+        {
+          "type": "text",
+          "data": "建议把第三方可配置内容控制在页面结构、组件参数、数据源和动作声明范围内。真正涉及账号、IM、支付、相册、定位的能力必须由客户端统一接管。",
+          "style": {
+            "fontSize": 16,
+            "height": 1.55,
+            "color": "#FF1F2937"
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 14
+        },
+        {
+          "type": "card",
+          "shape": {
+            "type": "roundedRectangleBorder",
+            "borderRadius": 8
+          },
+          "child": {
+            "type": "container",
+            "padding": 14,
+            "child": {
+              "type": "text",
+              "data": "配置发布流程：草稿 -> 预览 -> 审核 -> 灰度 -> 全量 -> 可回滚。",
+              "style": {
+                "fontSize": 15,
+                "height": 1.5,
+                "color": "#FF334155"
+              }
+            }
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 14
+        },
+        {
+          "type": "filledButton",
+          "onPressed": {
+            "actionType": "platform",
+            "capability": "openChat",
+            "title": "联系平台顾问",
+            "payload": {
+              "scene": "publishing_guide"
+            }
+          },
+          "child": {
+            "type": "text",
+            "data": "联系平台顾问"
+          }
+        }
+      ]
+    }
+  }
+}

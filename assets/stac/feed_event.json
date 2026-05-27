@@ -1,0 +1,152 @@
+{
+  "type": "listView",
+  "padding": 12,
+  "children": [
+    {
+      "type": "container",
+      "padding": 18,
+      "decoration": {
+        "color": "#FF7C2D12",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "column",
+        "crossAxisAlignment": "start",
+        "children": [
+          {
+            "type": "text",
+            "data": "创作者直播周",
+            "style": {
+              "fontSize": 24,
+              "fontWeight": "bold",
+              "color": "#FFFFFFFF"
+            }
+          },
+          {
+            "type": "sizedBox",
+            "height": 8
+          },
+          {
+            "type": "text",
+            "data": "这套配置把内容流替换成活动运营样式，适合节日活动、招募计划、品牌合作。",
+            "style": {
+              "fontSize": 14,
+              "height": 1.45,
+              "color": "#FFFFEDD5"
+            }
+          },
+          {
+            "type": "sizedBox",
+            "height": 14
+          },
+          {
+            "type": "filledButton",
+            "onPressed": {
+              "actionType": "platform",
+              "capability": "openChat",
+              "title": "咨询活动客服",
+              "payload": {
+                "chatType": "support",
+                "campaignId": "creator_live_week"
+              }
+            },
+            "child": {
+              "type": "text",
+              "data": "咨询客服"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "sizedBox",
+      "height": 12
+    },
+    {
+      "type": "card",
+      "shape": {
+        "type": "roundedRectangleBorder",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "container",
+        "padding": 14,
+        "child": {
+          "type": "column",
+          "crossAxisAlignment": "start",
+          "children": [
+            {
+              "type": "text",
+              "data": "今日任务",
+              "style": {
+                "fontSize": 18,
+                "fontWeight": "bold",
+                "color": "#FF111827"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 10
+            },
+            {
+              "type": "text",
+              "data": "发布 1 篇文章 · 分享到 2 个群聊 · 邀请 3 位好友参与讨论",
+              "style": {
+                "fontSize": 14,
+                "height": 1.45,
+                "color": "#FF475569"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "outlinedButton",
+              "onPressed": {
+                "actionType": "platform",
+                "capability": "shareArticle",
+                "title": "分享活动卡片",
+                "payload": {
+                  "campaignId": "creator_live_week",
+                  "cardType": "campaign"
+                }
+              },
+              "child": {
+                "type": "text",
+                "data": "分享活动"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "sizedBox",
+      "height": 12
+    },
+    {
+      "type": "card",
+      "shape": {
+        "type": "roundedRectangleBorder",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "listTile",
+        "leading": {
+          "type": "icon",
+          "icon": "event_available",
+          "color": "#FFEA580C"
+        },
+        "title": {
+          "type": "text",
+          "data": "20:00 圆桌直播"
+        },
+        "subtitle": {
+          "type": "text",
+          "data": "动态配置可以直接切换信息架构和主按钮"
+        }
+      }
+    }
+  ]
+}

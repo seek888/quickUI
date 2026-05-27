@@ -1,0 +1,207 @@
+{
+  "type": "listView",
+  "padding": 12,
+  "children": [
+    {
+      "type": "card",
+      "shape": {
+        "type": "roundedRectangleBorder",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "container",
+        "padding": 16,
+        "child": {
+          "type": "column",
+          "crossAxisAlignment": "start",
+          "children": [
+            {
+              "type": "text",
+              "data": "创作者控制台",
+              "style": {
+                "fontSize": 22,
+                "fontWeight": "bold",
+                "color": "#FF111827"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 8
+            },
+            {
+              "type": "text",
+              "data": "演示第三方用户如何通过配置申请能力、创建活动入口，并由客户端承接敏感能力。",
+              "style": {
+                "fontSize": 14,
+                "height": 1.45,
+                "color": "#FF475569"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "sizedBox",
+      "height": 12
+    },
+    {
+      "type": "card",
+      "shape": {
+        "type": "roundedRectangleBorder",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "container",
+        "padding": 14,
+        "child": {
+          "type": "column",
+          "crossAxisAlignment": "start",
+          "children": [
+            {
+              "type": "text",
+              "data": "能力申请",
+              "style": {
+                "fontSize": 17,
+                "fontWeight": "bold",
+                "color": "#FF111827"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 10
+            },
+            {
+              "type": "wrap",
+              "spacing": 8,
+              "runSpacing": 8,
+              "children": [
+                {
+                  "type": "chip",
+                  "label": {
+                    "type": "text",
+                    "data": "读取公开资料"
+                  }
+                },
+                {
+                  "type": "chip",
+                  "label": {
+                    "type": "text",
+                    "data": "打开私信"
+                  }
+                },
+                {
+                  "type": "chip",
+                  "label": {
+                    "type": "text",
+                    "data": "分享卡片"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "filledButton",
+              "onPressed": {
+                "actionType": "platform",
+                "capability": "requestPermission",
+                "title": "申请开放能力",
+                "message": "真实平台中，这里会进入权限审核、用户授权和能力开通流程。",
+                "payload": {
+                  "appId": "demo_creator_app",
+                  "scopes": "profile, chat.open, share.card"
+                }
+              },
+              "child": {
+                "type": "text",
+                "data": "申请能力"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "sizedBox",
+      "height": 12
+    },
+    {
+      "type": "card",
+      "shape": {
+        "type": "roundedRectangleBorder",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "container",
+        "padding": 14,
+        "child": {
+          "type": "column",
+          "crossAxisAlignment": "start",
+          "children": [
+            {
+              "type": "text",
+              "data": "动态活动表单",
+              "style": {
+                "fontSize": 17,
+                "fontWeight": "bold",
+                "color": "#FF111827"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "textField",
+              "maxLines": 1,
+              "decoration": {
+                "labelText": "活动名称",
+                "hintText": "例如：创作者招募计划",
+                "filled": true,
+                "fillColor": "#FFF8FAFC"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "textField",
+              "maxLines": 3,
+              "decoration": {
+                "labelText": "活动说明",
+                "hintText": "填写展示给用户看的说明",
+                "filled": true,
+                "fillColor": "#FFF8FAFC"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "filledButton",
+              "onPressed": {
+                "actionType": "platform",
+                "capability": "submitForm",
+                "title": "提交活动配置",
+                "message": "当前 demo 不接服务器，只模拟把动态表单提交给平台网关。",
+                "payload": {
+                  "formId": "creator_campaign_form",
+                  "target": "local_demo_gateway"
+                }
+              },
+              "child": {
+                "type": "text",
+                "data": "提交配置"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

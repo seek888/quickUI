@@ -1,0 +1,185 @@
+{
+  "type": "listView",
+  "padding": 12,
+  "children": [
+    {
+      "type": "container",
+      "padding": 18,
+      "decoration": {
+        "color": "#FF0F172A",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "column",
+        "crossAxisAlignment": "start",
+        "children": [
+          {
+            "type": "text",
+            "data": "数据看板",
+            "style": {
+              "fontSize": 24,
+              "fontWeight": "bold",
+              "color": "#FFFFFFFF"
+            }
+          },
+          {
+            "type": "sizedBox",
+            "height": 8
+          },
+          {
+            "type": "text",
+            "data": "第三套创作者配置，展示指标卡和运营建议。",
+            "style": {
+              "fontSize": 14,
+              "color": "#FFCBD5E1"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "sizedBox",
+      "height": 12
+    },
+    {
+      "type": "row",
+      "children": [
+        {
+          "type": "expanded",
+          "child": {
+            "type": "card",
+            "shape": {
+              "type": "roundedRectangleBorder",
+              "borderRadius": 8
+            },
+            "child": {
+              "type": "container",
+              "padding": 14,
+              "child": {
+                "type": "column",
+                "crossAxisAlignment": "start",
+                "children": [
+                  {
+                    "type": "text",
+                    "data": "阅读",
+                    "style": {
+                      "color": "#FF64748B"
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "data": "24.8k",
+                    "style": {
+                      "fontSize": 24,
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "type": "sizedBox",
+          "width": 10
+        },
+        {
+          "type": "expanded",
+          "child": {
+            "type": "card",
+            "shape": {
+              "type": "roundedRectangleBorder",
+              "borderRadius": 8
+            },
+            "child": {
+              "type": "container",
+              "padding": 14,
+              "child": {
+                "type": "column",
+                "crossAxisAlignment": "start",
+                "children": [
+                  {
+                    "type": "text",
+                    "data": "分享",
+                    "style": {
+                      "color": "#FF64748B"
+                    }
+                  },
+                  {
+                    "type": "text",
+                    "data": "1.2k",
+                    "style": {
+                      "fontSize": 24,
+                      "fontWeight": "bold"
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "sizedBox",
+      "height": 12
+    },
+    {
+      "type": "card",
+      "shape": {
+        "type": "roundedRectangleBorder",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "container",
+        "padding": 14,
+        "child": {
+          "type": "column",
+          "crossAxisAlignment": "start",
+          "children": [
+            {
+              "type": "text",
+              "data": "运营建议",
+              "style": {
+                "fontSize": 18,
+                "fontWeight": "bold"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 8
+            },
+            {
+              "type": "text",
+              "data": "你的文章在私信分享场景转化更高，可以申请会话卡片能力。",
+              "style": {
+                "fontSize": 14,
+                "height": 1.45,
+                "color": "#FF475569"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "filledButton",
+              "onPressed": {
+                "actionType": "platform",
+                "capability": "requestPermission",
+                "title": "申请会话卡片能力",
+                "payload": {
+                  "scope": "share.card.advanced"
+                }
+              },
+              "child": {
+                "type": "text",
+                "data": "申请能力"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

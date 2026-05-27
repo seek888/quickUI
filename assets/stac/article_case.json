@@ -1,0 +1,92 @@
+{
+  "type": "singleChildScrollView",
+  "child": {
+    "type": "container",
+    "padding": 12,
+    "child": {
+      "type": "column",
+      "crossAxisAlignment": "start",
+      "children": [
+        {
+          "type": "container",
+          "padding": 18,
+          "decoration": {
+            "color": "#FF312E81",
+            "borderRadius": 8
+          },
+          "child": {
+            "type": "text",
+            "data": "案例拆解：三分钟上线一个社区活动页",
+            "style": {
+              "fontSize": 24,
+              "fontWeight": "bold",
+              "height": 1.2,
+              "color": "#FFFFFFFF"
+            }
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 14
+        },
+        {
+          "type": "card",
+          "shape": {
+            "type": "roundedRectangleBorder",
+            "borderRadius": 8
+          },
+          "child": {
+            "type": "container",
+            "padding": 14,
+            "child": {
+              "type": "column",
+              "crossAxisAlignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "data": "配置变化点",
+                  "style": {
+                    "fontSize": 18,
+                    "fontWeight": "bold"
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 10
+                },
+                {
+                  "type": "text",
+                  "data": "更换头图区域、调整按钮动作、增加推荐模块、改写分享 payload。所有变化都在 JSON 中完成。",
+                  "style": {
+                    "fontSize": 15,
+                    "height": 1.5,
+                    "color": "#FF334155"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 14
+        },
+        {
+          "type": "outlinedButton",
+          "onPressed": {
+            "actionType": "platform",
+            "capability": "shareArticle",
+            "title": "分享案例",
+            "payload": {
+              "articleId": "case_sdui_campaign"
+            }
+          },
+          "child": {
+            "type": "text",
+            "data": "分享案例"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "type": "listView",
+  "padding": 12,
+  "children": [
+    {
+      "type": "container",
+      "padding": 18,
+      "decoration": {
+        "color": "#FF12343B",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "column",
+        "crossAxisAlignment": "start",
+        "children": [
+          {
+            "type": "text",
+            "data": "本周作者榜",
+            "style": {
+              "fontSize": 24,
+              "fontWeight": "bold",
+              "color": "#FFFFFFFF"
+            }
+          },
+          {
+            "type": "sizedBox",
+            "height": 8
+          },
+          {
+            "type": "text",
+            "data": "下载配置后，内容流被替换成榜单样式。客户端代码没有变化。",
+            "style": {
+              "fontSize": 14,
+              "height": 1.45,
+              "color": "#FFD1FAE5"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "sizedBox",
+      "height": 12
+    },
+    {
+      "type": "card",
+      "shape": {
+        "type": "roundedRectangleBorder",
+        "borderRadius": 8
+      },
+      "child": {
+        "type": "container",
+        "padding": 14,
+        "child": {
+          "type": "column",
+          "children": [
+            {
+              "type": "listTile",
+              "leading": {
+                "type": "circleAvatar",
+                "backgroundColor": "#FFFFF7ED",
+                "child": {
+                  "type": "text",
+                  "data": "1"
+                }
+              },
+              "title": {
+                "type": "text",
+                "data": "阿澈 · 1280 热度"
+              },
+              "subtitle": {
+                "type": "text",
+                "data": "开放平台教程作者"
+              }
+            },
+            {
+              "type": "divider"
+            },
+            {
+              "type": "listTile",
+              "leading": {
+                "type": "circleAvatar",
+                "backgroundColor": "#FFE0F2FE",
+                "child": {
+                  "type": "text",
+                  "data": "2"
+                }
+              },
+              "title": {
+                "type": "text",
+                "data": "林川 · 980 热度"
+              },
+              "subtitle": {
+                "type": "text",
+                "data": "产品设计和社区运营"
+              }
+            },
+            {
+              "type": "sizedBox",
+              "height": 12
+            },
+            {
+              "type": "filledButton",
+              "onPressed": {
+                "actionType": "platform",
+                "capability": "shareArticle",
+                "title": "分享作者榜",
+                "payload": {
+                  "rankId": "weekly_author_rank"
+                }
+              },
+              "child": {
+                "type": "text",
+                "data": "分享榜单"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

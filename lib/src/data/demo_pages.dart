@@ -30,6 +30,19 @@ class DemoConfigVariant {
 
 const demoPages = <DemoPageConfig>[
   DemoPageConfig(
+    id: 'im',
+    title: 'IM',
+    variants: [
+      DemoConfigVariant(
+        name: 'IM 能力 POC',
+        assetPath: 'native://im-demo',
+        summary: '会话、Bot、命令、动态卡片和表单',
+      ),
+    ],
+    icon: Icons.chat_bubble_outline,
+    description: '模拟 Slack/Discord 风格的 IM 开放能力',
+  ),
+  DemoPageConfig(
     id: 'feed',
     title: '内容流',
     variants: [

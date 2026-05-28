@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:stac/stac.dart';
 
 import '../data/demo_pages.dart';
+import '../im/im_demo_page.dart';
 
 class DemoShell extends StatefulWidget {
   const DemoShell({super.key});
@@ -35,6 +36,13 @@ class _DemoShellState extends State<DemoShell> {
   }
 
   void _openCurrentConfig() {
+    if (_selectedPage.id == 'im') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('IM POC 使用原生容器 + 动态卡片表单，当前入口没有页面 JSON。')),
+      );
+      return;
+    }
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) =>
@@ -79,15 +87,19 @@ class _DemoShellState extends State<DemoShell> {
                   key: ValueKey(
                     '${_selectedPage.id}-${_selectedVariant.assetPath}',
                   ),
-                  child: Stac.fromAssets(
-                    _selectedVariant.assetPath,
-                    loadingWidget: (_) {
-                      return const Center(child: CircularProgressIndicator());
-                    },
-                    errorWidget: (_, error) {
-                      return Center(child: Text('配置加载失败: $error'));
-                    },
-                  ),
+                  child: _selectedPage.id == 'im'
+                      ? const ImDemoPage()
+                      : Stac.fromAssets(
+                          _selectedVariant.assetPath,
+                          loadingWidget: (_) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          errorWidget: (_, error) {
+                            return Center(child: Text('配置加载失败: $error'));
+                          },
+                        ),
                 ),
               ),
             ),

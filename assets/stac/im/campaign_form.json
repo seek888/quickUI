@@ -1,0 +1,140 @@
+{
+  "type": "singleChildScrollView",
+  "child": {
+    "type": "container",
+    "padding": 16,
+    "child": {
+      "type": "column",
+      "crossAxisAlignment": "start",
+      "children": [
+        {
+          "type": "text",
+          "data": "创建 IM 活动卡片",
+          "style": {
+            "fontSize": 22,
+            "fontWeight": "bold",
+            "color": "#FF111827"
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 8
+        },
+        {
+          "type": "text",
+          "data": "这个表单由 Stac JSON 渲染，模拟 Slack/Discord 中 Bot 打开 Modal 后收集信息，再回写一条消息卡片。",
+          "style": {
+            "fontSize": 14,
+            "height": 1.45,
+            "color": "#FF475569"
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 16
+        },
+        {
+          "type": "textField",
+          "maxLines": 1,
+          "decoration": {
+            "labelText": "活动标题",
+            "hintText": "例如：春季创作挑战",
+            "filled": true,
+            "fillColor": "#FFF8FAFC"
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 12
+        },
+        {
+          "type": "textField",
+          "maxLines": 3,
+          "decoration": {
+            "labelText": "活动说明",
+            "hintText": "填写频道成员看到的说明",
+            "filled": true,
+            "fillColor": "#FFF8FAFC"
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 12
+        },
+        {
+          "type": "textField",
+          "maxLines": 1,
+          "decoration": {
+            "labelText": "目标频道",
+            "hintText": "#创作者运营频道",
+            "filled": true,
+            "fillColor": "#FFF8FAFC"
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 16
+        },
+        {
+          "type": "card",
+          "shape": {
+            "type": "roundedRectangleBorder",
+            "borderRadius": 8
+          },
+          "child": {
+            "type": "container",
+            "padding": 14,
+            "child": {
+              "type": "column",
+              "crossAxisAlignment": "start",
+              "children": [
+                {
+                  "type": "text",
+                  "data": "将调用的平台能力",
+                  "style": {
+                    "fontWeight": "bold",
+                    "fontSize": 16
+                  }
+                },
+                {
+                  "type": "sizedBox",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "data": "message.send_card · modal.open · workflow.start",
+                  "style": {
+                    "fontSize": 13,
+                    "height": 1.4,
+                    "color": "#FF64748B"
+                  }
+                }
+              ]
+            }
+          }
+        },
+        {
+          "type": "sizedBox",
+          "height": 16
+        },
+        {
+          "type": "filledButton",
+          "onPressed": {
+            "actionType": "platform",
+            "capability": "submitForm",
+            "title": "提交 IM 动态表单",
+            "message": "真实产品中，这里会由 Bot 服务创建消息卡片并发送到频道。",
+            "payload": {
+              "workflow": "campaign_card_create",
+              "scope": "message.send_card"
+            }
+          },
+          "child": {
+            "type": "text",
+            "data": "提交并生成卡片"
+          }
+        }
+      ]
+    }
+  }
+}

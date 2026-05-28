@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,6 +19,7 @@ class ImDemoPage extends StatefulWidget {
 class _ImDemoPageState extends State<ImDemoPage> {
   final MockImRepository _repository = MockImRepository();
   final WeatherApiService _weatherApiService = WeatherApiService();
+  final Random _random = Random();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _messageScrollController = ScrollController();
 
@@ -135,7 +137,7 @@ class _ImDemoPageState extends State<ImDemoPage> {
 
   Future<void> _openDynamicForm(ImCard card) async {
     if (card.template == 'weather_card') {
-      final cityName = card.payload['city'] ?? 'Shanghai';
+      final cityName = _randomChineseCity(exceptCity: card.payload['city']);
       await _fetchAndAppendWeather(
         cityName,
         conversationId: _selectedConversationId,
@@ -172,6 +174,28 @@ class _ImDemoPageState extends State<ImDemoPage> {
         conversationId: _selectedConversationId,
       ),
     );
+  }
+
+  String _randomChineseCity({String? exceptCity}) {
+    const cities = [
+      'Beijing',
+      'Shanghai',
+      'Guangzhou',
+      'Shenzhen',
+      'Hangzhou',
+      'Chengdu',
+      'Wuhan',
+      'Nanjing',
+      'Xian',
+      'Chongqing',
+      'Suzhou',
+      'Qingdao',
+      'Xiamen',
+      'Changsha',
+      'Kunming',
+    ];
+    final candidates = cities.where((city) => city != exceptCity).toList();
+    return candidates[_random.nextInt(candidates.length)];
   }
 
   Future<void> _fetchAndAppendWeather(

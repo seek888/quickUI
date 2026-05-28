@@ -86,6 +86,35 @@ void main() {
     expect(composer.controller?.text, isEmpty);
   });
 
+  testWidgets('opens IM app manager', (WidgetTester tester) async {
+    await tester.pumpWidget(const QuickUiDemoApp());
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tap(find.byIcon(Icons.extension_outlined));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('频道应用管理'), findsOneWidget);
+    expect(find.text('QuickUI 创作者助手'), findsOneWidget);
+    expect(find.text('权限 Scope'), findsOneWidget);
+  });
+
+  testWidgets('opens scope request flow', (WidgetTester tester) async {
+    await tester.pumpWidget(const QuickUiDemoApp());
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.enterText(
+      find.byKey(const ValueKey('im-message-composer')),
+      '/request_scope',
+    );
+    await tester.tap(find.byIcon(Icons.send_outlined));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.text('申请 IM 能力'), findsOneWidget);
+    expect(find.text('启动工作流'), findsOneWidget);
+  });
+
   test('mock IM repository creates campaign command card', () {
     final repository = MockImRepository();
     final message = repository.createCommandResult(
@@ -96,5 +125,13 @@ void main() {
     expect(message.kind, ImMessageKind.card);
     expect(message.card?.title, '新建活动卡片');
     expect(message.card?.template, 'campaign_card');
+  });
+
+  test('mock IM manifest exposes app scopes and templates', () {
+    final manifest = MockImRepository().getManifest();
+
+    expect(manifest.name, 'QuickUI 创作者助手');
+    expect(manifest.scopes.any((scope) => !scope.granted), isTrue);
+    expect(manifest.cardTemplates.length, 3);
   });
 }

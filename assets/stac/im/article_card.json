@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "1.0",
+  "template": "article_card",
+  "name": "文章卡片",
+  "requiredScopes": ["message.send_card", "content.read"],
+  "layout": {
+    "type": "messageCard",
+    "header": {
+      "title": "{{article.title}}",
+      "subtitle": "{{article.authorName}}"
+    },
+    "body": [
+      {
+        "type": "text",
+        "value": "{{article.summary}}"
+      }
+    ],
+    "actions": [
+      {
+        "label": "查看",
+        "actionType": "platform",
+        "capability": "content.open_article"
+      },
+      {
+        "label": "转发",
+        "actionType": "platform",
+        "capability": "message.share_card"
+      }
+    ]
+  }
+}

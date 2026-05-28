@@ -53,6 +53,8 @@ class MockImRepository {
           subtitle: '点击按钮打开 Stac 动态表单，提交后生成活动卡片。',
           primaryAction: '打开表单',
           secondaryAction: '分享',
+          configAsset: 'assets/stac/im/campaign_card.json',
+          formAsset: 'assets/stac/im/campaign_form.json',
           payload: {
             'campaignId': 'spring_creator_2026',
             'source': 'channel_card',
@@ -91,6 +93,8 @@ class MockImRepository {
           subtitle: '用于统一 IM 卡片、专题页和活动表单的组件边界。',
           primaryAction: '查看',
           secondaryAction: '转发',
+          configAsset: 'assets/stac/im/article_card.json',
+          formAsset: 'assets/stac/im/campaign_form.json',
           payload: {
             'articleId': 'dynamic_component_spec',
             'source': 'group_share',
@@ -157,6 +161,8 @@ class MockImRepository {
           subtitle: '命令触发 Bot，Bot 返回一张可交互动态卡片。',
           primaryAction: '打开表单',
           secondaryAction: '分享',
+          configAsset: 'assets/stac/im/campaign_card.json',
+          formAsset: 'assets/stac/im/campaign_form.json',
           payload: {'command': '/campaign'},
         ),
       );
@@ -175,6 +181,8 @@ class MockImRepository {
           subtitle: '消息卡片可以承载投票、审批、报名和任务。',
           primaryAction: '参与投票',
           secondaryAction: '查看结果',
+          configAsset: 'assets/stac/im/poll_card.json',
+          formAsset: 'assets/stac/im/campaign_form.json',
           payload: {'command': '/poll'},
         ),
       );
@@ -187,6 +195,82 @@ class MockImRepository {
       sentAt: '现在',
       kind: ImMessageKind.system,
       text: '已收到 $command。该命令需要申请对应 scope 后才能执行。',
+    );
+  }
+
+  ImMessage createSubmittedCampaignCard({required String conversationId}) {
+    return ImMessage(
+      id: 'submitted_${DateTime.now().microsecondsSinceEpoch}',
+      conversationId: conversationId,
+      senderName: 'QuickUI Bot',
+      sentAt: '现在',
+      kind: ImMessageKind.card,
+      card: const ImCard(
+        template: 'campaign_card',
+        title: '已提交：春季创作挑战',
+        subtitle: '表单提交后，工作流生成新的频道消息卡片。',
+        primaryAction: '再次编辑',
+        secondaryAction: '分享',
+        configAsset: 'assets/stac/im/campaign_card.json',
+        formAsset: 'assets/stac/im/campaign_form.json',
+        payload: {'workflow': 'campaign_card_create'},
+      ),
+    );
+  }
+
+  ImAppManifest getManifest() {
+    return ImAppManifest(
+      appId: 'quickui_creator_bot',
+      name: 'QuickUI 创作者助手',
+      description: '安装到频道后提供活动卡片、投票、表单和能力申请。',
+      installed: true,
+      scopes: const [
+        ImScope(
+          id: 'message.send_card',
+          name: '发送卡片消息',
+          description: '允许 Bot 在已安装频道发送结构化卡片。',
+          granted: true,
+        ),
+        ImScope(
+          id: 'modal.open',
+          name: '打开动态表单',
+          description: '允许按钮或命令打开 Stac 表单。',
+          granted: true,
+        ),
+        ImScope(
+          id: 'workflow.start',
+          name: '启动工作流',
+          description: '允许表单提交后触发自动化流程。',
+          granted: false,
+        ),
+        ImScope(
+          id: 'member.invite',
+          name: '邀请成员',
+          description: '允许应用辅助邀请成员加入频道。',
+          granted: false,
+        ),
+      ],
+      commands: _commands,
+      cardTemplates: const [
+        ImCardTemplate(
+          id: 'campaign_card',
+          name: '活动卡片',
+          description: '用于报名、活动传播和频道通知。',
+          configAsset: 'assets/stac/im/campaign_card.json',
+        ),
+        ImCardTemplate(
+          id: 'poll_card',
+          name: '投票卡片',
+          description: '用于频道投票和轻量决策。',
+          configAsset: 'assets/stac/im/poll_card.json',
+        ),
+        ImCardTemplate(
+          id: 'article_card',
+          name: '文章卡片',
+          description: '用于把内容分享到会话。',
+          configAsset: 'assets/stac/im/article_card.json',
+        ),
+      ],
     );
   }
 }

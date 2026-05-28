@@ -52,6 +52,8 @@ class ImCard {
     required this.primaryAction,
     required this.secondaryAction,
     required this.payload,
+    required this.configAsset,
+    required this.formAsset,
   });
 
   final String template;
@@ -60,6 +62,8 @@ class ImCard {
   final String primaryAction;
   final String secondaryAction;
   final Map<String, String> payload;
+  final String configAsset;
+  final String formAsset;
 }
 
 class ImCommand {
@@ -72,4 +76,52 @@ class ImCommand {
   final String name;
   final String description;
   final String scope;
+}
+
+class ImAppManifest {
+  const ImAppManifest({
+    required this.appId,
+    required this.name,
+    required this.description,
+    required this.installed,
+    required this.scopes,
+    required this.commands,
+    required this.cardTemplates,
+  });
+
+  final String appId;
+  final String name;
+  final String description;
+  final bool installed;
+  final List<ImScope> scopes;
+  final List<ImCommand> commands;
+  final List<ImCardTemplate> cardTemplates;
+}
+
+class ImScope {
+  const ImScope({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.granted,
+  });
+
+  final String id;
+  final String name;
+  final String description;
+  final bool granted;
+}
+
+class ImCardTemplate {
+  const ImCardTemplate({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.configAsset,
+  });
+
+  final String id;
+  final String name;
+  final String description;
+  final String configAsset;
 }

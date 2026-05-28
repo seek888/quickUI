@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "template": "poll_card",
+  "name": "投票卡片",
+  "requiredScopes": ["message.send_card", "workflow.start"],
+  "layout": {
+    "type": "messageCard",
+    "header": {
+      "title": "{{poll.title}}",
+      "subtitle": "频道投票"
+    },
+    "body": [
+      {
+        "type": "option",
+        "label": "{{poll.options[0]}}"
+      },
+      {
+        "type": "option",
+        "label": "{{poll.options[1]}}"
+      }
+    ],
+    "actions": [
+      {
+        "label": "参与投票",
+        "actionType": "platform",
+        "capability": "workflow.start"
+      },
+      {
+        "label": "查看结果",
+        "actionType": "platform",
+        "capability": "message.open_detail"
+      }
+    ]
+  }
+}

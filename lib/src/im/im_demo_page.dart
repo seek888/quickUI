@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:stac/stac.dart';
 
 import 'im_models.dart';
@@ -48,6 +51,12 @@ class _ImDemoPageState extends State<ImDemoPage> {
     final input = _messageController.text.trim();
     if (input.isEmpty) return;
 
+    if (input.startsWith('/request_scope')) {
+      _messageController.clear();
+      _showScopeRequestSheet();
+      return;
+    }
+
     final message = input.startsWith('/')
         ? _repository.createCommandResult(
             conversationId: _selectedConversationId,
@@ -82,8 +91,8 @@ class _ImDemoPageState extends State<ImDemoPage> {
     );
   }
 
-  Future<void> _openDynamicForm(ImCard card) {
-    return showModalBottomSheet<void>(
+  Future<void> _openDynamicForm(ImCard card) async {
+    await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
@@ -95,7 +104,7 @@ class _ImDemoPageState extends State<ImDemoPage> {
           child: SizedBox(
             height: MediaQuery.sizeOf(context).height * 0.72,
             child: Stac.fromAssets(
-              'assets/stac/im/campaign_form.json',
+              card.formAsset,
               loadingWidget: (_) {
                 return const Center(child: CircularProgressIndicator());
               },
@@ -105,6 +114,62 @@ class _ImDemoPageState extends State<ImDemoPage> {
             ),
           ),
         );
+      },
+    );
+    _appendMessage(
+      _repository.createSubmittedCampaignCard(
+        conversationId: _selectedConversationId,
+      ),
+    );
+  }
+
+  void _appendMessage(ImMessage message) {
+    setState(() {
+      _messagesByConversation[_selectedConversationId] = [
+        ..._messages,
+        message,
+      ];
+    });
+    _scrollToBottom();
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_messageScrollController.hasClients) return;
+      _messageScrollController.animateTo(
+        _messageScrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
+  void _openCardConfig(ImCard card) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ImJsonViewerPage(
+          title: '${card.template} 配置',
+          assetPath: card.configAsset,
+          summary: '消息卡片模板由结构化 JSON 描述，客户端只渲染和分发受控 action。',
+        ),
+      ),
+    );
+  }
+
+  void _openAppManager() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ImAppManagerPage(manifest: _repository.getManifest()),
+      ),
+    );
+  }
+
+  void _showScopeRequestSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      useSafeArea: true,
+      builder: (context) {
+        return _ScopeRequestSheet(manifest: _repository.getManifest());
       },
     );
   }
@@ -142,7 +207,9 @@ class _ImDemoPageState extends State<ImDemoPage> {
                   controller: _messageController,
                   onSend: _sendInput,
                   onOpenCard: _openDynamicForm,
+                  onViewCardConfig: _openCardConfig,
                   onShareCard: _shareCard,
+                  onOpenAppManager: _openAppManager,
                 ),
               ),
             ],
@@ -171,7 +238,9 @@ class _ImDemoPageState extends State<ImDemoPage> {
                 controller: _messageController,
                 onSend: _sendInput,
                 onOpenCard: _openDynamicForm,
+                onViewCardConfig: _openCardConfig,
                 onShareCard: _shareCard,
+                onOpenAppManager: _openAppManager,
               ),
             ),
           ],
@@ -334,7 +403,9 @@ class _ChatRoom extends StatelessWidget {
     required this.controller,
     required this.onSend,
     required this.onOpenCard,
+    required this.onViewCardConfig,
     required this.onShareCard,
+    required this.onOpenAppManager,
   });
 
   final ImConversation conversation;
@@ -343,13 +414,18 @@ class _ChatRoom extends StatelessWidget {
   final TextEditingController controller;
   final VoidCallback onSend;
   final ValueChanged<ImCard> onOpenCard;
+  final ValueChanged<ImCard> onViewCardConfig;
   final ValueChanged<ImCard> onShareCard;
+  final VoidCallback onOpenAppManager;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _ChatHeader(conversation: conversation),
+        _ChatHeader(
+          conversation: conversation,
+          onOpenAppManager: onOpenAppManager,
+        ),
         const Divider(height: 1),
         Expanded(
           child: ListView.builder(
@@ -360,6 +436,7 @@ class _ChatRoom extends StatelessWidget {
               return _MessageBubble(
                 message: messages[index],
                 onOpenCard: onOpenCard,
+                onViewCardConfig: onViewCardConfig,
                 onShareCard: onShareCard,
               );
             },
@@ -372,9 +449,13 @@ class _ChatRoom extends StatelessWidget {
 }
 
 class _ChatHeader extends StatelessWidget {
-  const _ChatHeader({required this.conversation});
+  const _ChatHeader({
+    required this.conversation,
+    required this.onOpenAppManager,
+  });
 
   final ImConversation conversation;
+  final VoidCallback onOpenAppManager;
 
   @override
   Widget build(BuildContext context) {
@@ -406,11 +487,7 @@ class _ChatHeader extends StatelessWidget {
           ),
           IconButton(
             tooltip: '频道工具',
-            onPressed: () {
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text('这里会打开频道工具和应用安装管理')));
-            },
+            onPressed: onOpenAppManager,
             icon: const Icon(Icons.extension_outlined),
           ),
         ],
@@ -432,11 +509,13 @@ class _MessageBubble extends StatelessWidget {
   const _MessageBubble({
     required this.message,
     required this.onOpenCard,
+    required this.onViewCardConfig,
     required this.onShareCard,
   });
 
   final ImMessage message;
   final ValueChanged<ImCard> onOpenCard;
+  final ValueChanged<ImCard> onViewCardConfig;
   final ValueChanged<ImCard> onShareCard;
 
   @override
@@ -483,6 +562,7 @@ class _MessageBubble extends StatelessWidget {
               _CardMessage(
                 card: message.card!,
                 onOpenCard: onOpenCard,
+                onViewCardConfig: onViewCardConfig,
                 onShareCard: onShareCard,
               ),
           ],
@@ -525,11 +605,13 @@ class _CardMessage extends StatelessWidget {
   const _CardMessage({
     required this.card,
     required this.onOpenCard,
+    required this.onViewCardConfig,
     required this.onShareCard,
   });
 
   final ImCard card;
   final ValueChanged<ImCard> onOpenCard;
+  final ValueChanged<ImCard> onViewCardConfig;
   final ValueChanged<ImCard> onShareCard;
 
   @override
@@ -595,6 +677,11 @@ class _CardMessage extends StatelessWidget {
                       icon: const Icon(Icons.ios_share_outlined, size: 18),
                       label: Text(card.secondaryAction),
                     ),
+                    TextButton.icon(
+                      onPressed: () => onViewCardConfig(card),
+                      icon: const Icon(Icons.account_tree_outlined, size: 18),
+                      label: const Text('配置'),
+                    ),
                   ],
                 ),
               ],
@@ -646,6 +733,285 @@ class _MessageComposer extends StatelessWidget {
             tooltip: '发送',
             onPressed: onSend,
             icon: const Icon(Icons.send_outlined),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ImJsonViewerPage extends StatefulWidget {
+  const ImJsonViewerPage({
+    super.key,
+    required this.title,
+    required this.assetPath,
+    required this.summary,
+  });
+
+  final String title;
+  final String assetPath;
+  final String summary;
+
+  @override
+  State<ImJsonViewerPage> createState() => _ImJsonViewerPageState();
+}
+
+class _ImJsonViewerPageState extends State<ImJsonViewerPage> {
+  late final Future<String> _jsonFuture = _loadJson();
+
+  Future<String> _loadJson() async {
+    final raw = await rootBundle.loadString(widget.assetPath);
+    final decoded = jsonDecode(raw);
+    return const JsonEncoder.withIndent('  ').convert(decoded);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(widget.title)),
+      body: SafeArea(
+        child: FutureBuilder<String>(
+          future: _jsonFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(child: Text('读取失败: ${snapshot.error}'));
+            }
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.summary,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        widget.assetPath,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF0F172A),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SingleChildScrollView(
+                        child: SelectableText(
+                          snapshot.data ?? '',
+                          style: const TextStyle(
+                            color: Color(0xFFE2E8F0),
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                            height: 1.35,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class ImAppManagerPage extends StatelessWidget {
+  const ImAppManagerPage({super.key, required this.manifest});
+
+  final ImAppManifest manifest;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('频道应用管理')),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.all(12),
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer,
+                          child: const Icon(Icons.smart_toy_outlined),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                manifest.name,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              Text(
+                                manifest.appId,
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: const Color(0xFF64748B)),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Switch(value: manifest.installed, onChanged: (_) {}),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(manifest.description),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text('权限 Scope', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            for (final scope in manifest.scopes)
+              Card(
+                child: ListTile(
+                  leading: Icon(
+                    scope.granted
+                        ? Icons.check_circle_outline
+                        : Icons.lock_outline,
+                    color: scope.granted
+                        ? const Color(0xFF047857)
+                        : const Color(0xFFB45309),
+                  ),
+                  title: Text(scope.name),
+                  subtitle: Text('${scope.id} · ${scope.description}'),
+                  trailing: scope.granted
+                      ? const Text('已授权')
+                      : FilledButton(
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('已模拟申请：${scope.name}')),
+                            );
+                          },
+                          child: const Text('申请'),
+                        ),
+                ),
+              ),
+            const SizedBox(height: 12),
+            Text('命令', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            for (final command in manifest.commands)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.terminal_outlined),
+                  title: Text(command.name),
+                  subtitle: Text('${command.description} · ${command.scope}'),
+                ),
+              ),
+            const SizedBox(height: 12),
+            Text('卡片模板', style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            for (final template in manifest.cardTemplates)
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.widgets_outlined),
+                  title: Text(template.name),
+                  subtitle: Text(template.description),
+                  trailing: TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ImJsonViewerPage(
+                            title: '${template.name}配置',
+                            assetPath: template.configAsset,
+                            summary: template.description,
+                          ),
+                        ),
+                      );
+                    },
+                    child: const Text('查看'),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ScopeRequestSheet extends StatelessWidget {
+  const _ScopeRequestSheet({required this.manifest});
+
+  final ImAppManifest manifest;
+
+  @override
+  Widget build(BuildContext context) {
+    final pendingScopes = manifest.scopes
+        .where((scope) => !scope.granted)
+        .toList();
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('申请 IM 能力', style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 8),
+          Text(
+            '模拟第三方 App 申请更多频道能力。真实产品中会进入管理员审批和审计流程。',
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF475569)),
+          ),
+          const SizedBox(height: 12),
+          for (final scope in pendingScopes)
+            CheckboxListTile(
+              value: true,
+              onChanged: (_) {},
+              contentPadding: EdgeInsets.zero,
+              title: Text(scope.name),
+              subtitle: Text('${scope.id} · ${scope.description}'),
+            ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('已提交权限申请，等待频道管理员审批')),
+                );
+              },
+              child: const Text('提交申请'),
+            ),
           ),
         ],
       ),

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0",
+  "template": "campaign_card",
+  "name": "活动卡片",
+  "requiredScopes": ["message.send_card", "modal.open", "workflow.start"],
+  "layout": {
+    "type": "messageCard",
+    "header": {
+      "title": "{{campaign.title}}",
+      "subtitle": "{{campaign.channel}}"
+    },
+    "body": [
+      {
+        "type": "text",
+        "value": "{{campaign.description}}"
+      },
+      {
+        "type": "facts",
+        "items": [
+          {
+            "label": "报名人数",
+            "value": "{{campaign.joinedCount}}"
+          },
+          {
+            "label": "截止时间",
+            "value": "{{campaign.deadline}}"
+          }
+        ]
+      }
+    ],
+    "actions": [
+      {
+        "label": "打开表单",
+        "actionType": "platform",
+        "capability": "modal.open",
+        "payload": {
+          "asset": "assets/stac/im/campaign_form.json"
+        }
+      },
+      {
+        "label": "分享",
+        "actionType": "platform",
+        "capability": "message.share_card"
+      }
+    ]
+  }
+}

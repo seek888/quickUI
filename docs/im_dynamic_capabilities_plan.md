@@ -11,7 +11,10 @@
 - 模拟 slash command。
 - 模拟动态消息卡片。
 - 点击卡片打开 Stac 动态表单。
-- 表单提交后调用平台 action。
+- 表单提交后回写新的消息卡片。
+- 查看卡片 JSON 配置。
+- 查看频道应用安装、命令、Scope 和卡片模板。
+- 模拟 `/request_scope` 权限申请。
 
 ## 2. 参考 Slack/Discord 的方式
 
@@ -114,6 +117,9 @@ flowchart TD
 - `lib/src/im/mock_im_repository.dart`
 - `lib/src/im/im_demo_page.dart`
 - `assets/stac/im/campaign_form.json`
+- `assets/stac/im/campaign_card.json`
+- `assets/stac/im/poll_card.json`
+- `assets/stac/im/article_card.json`
 
 已模拟能力：
 
@@ -128,6 +134,11 @@ flowchart TD
 - 点击卡片打开动态 Stac 表单。
 - 分享卡片。
 - 表单提交走平台 action。
+- 表单关闭后模拟工作流回写一条活动卡片。
+- 卡片可以查看对应 JSON 模板。
+- 频道工具可以查看应用安装管理。
+- 应用管理页展示 Manifest、Scope、命令和卡片模板。
+- `/request_scope` 可以打开权限申请弹窗。
 
 ## 5. 可以开放给用户的 IM 功能
 
@@ -199,7 +210,8 @@ flowchart TD
 
 状态：
 
-- 已完成基础实现。
+- 已完成增强版本地 POC。
+- 仍未接入真实服务端、真实 IM SDK、真实权限审批和审核系统。
 
 ### 阶段 2：动态卡片协议
 
@@ -241,11 +253,11 @@ flowchart TD
 
 短期可以继续补：
 
-- 卡片配置查看器。
-- App Manifest 示例。
-- `/request_scope` 的授权弹窗。
-- 表单提交后真正插入一条新卡片消息。
-- Bot 应用安装管理页。
+- 将 App Manifest 从 Dart 常量迁移为 JSON 配置。
+- 卡片模板改成真正由 Stac 渲染，而不是当前原生卡片模拟。
+- 表单提交返回结构化结果，按结果生成不同卡片。
+- 增加频道事件触发器，如入群欢迎、定时提醒。
+- 增加本地权限状态切换，模拟管理员审批后 scope 生效。
 
 中期再接：
 

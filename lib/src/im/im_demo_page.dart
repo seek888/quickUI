@@ -30,6 +30,12 @@ class _ImDemoPageState extends State<ImDemoPage> {
     for (final conversation in _conversations)
       conversation.id: _repository.getMessages(conversation.id).toList(),
   };
+  late final Set<String> _grantedScopes = _repository
+      .getManifest()
+      .scopes
+      .where((scope) => scope.granted)
+      .map((scope) => scope.id)
+      .toSet();
 
   ImConversation get _selectedConversation => _conversations.firstWhere(
     (conversation) => conversation.id == _selectedConversationId,
@@ -90,6 +96,29 @@ class _ImDemoPageState extends State<ImDemoPage> {
       return;
     }
 
+    if (input.startsWith('/workflow')) {
+      _handleScopedCommand(
+        input: input,
+        requiredScope: 'workflow.start',
+        createResult: () => _repository.createWorkflowCard(
+          conversationId: _selectedConversationId,
+        ),
+      );
+      return;
+    }
+
+    if (input.startsWith('/invite')) {
+      _handleScopedCommand(
+        input: input,
+        requiredScope: 'member.invite',
+        createResult: () => _repository.createInviteResult(
+          conversationId: _selectedConversationId,
+          invitees: _parseInvitees(input),
+        ),
+      );
+      return;
+    }
+
     if (input.startsWith('/weather')) {
       final cityName = _parseWeatherCity(input);
       _messageController.clear();
@@ -126,6 +155,44 @@ class _ImDemoPageState extends State<ImDemoPage> {
   String _parseWeatherCity(String input) {
     final parts = input.split(RegExp(r'\s+')).where((part) => part.isNotEmpty);
     return parts.length >= 2 ? parts.skip(1).join(' ') : 'Shanghai';
+  }
+
+  List<String> _parseInvitees(String input) {
+    return input
+        .split(RegExp(r'\s+'))
+        .skip(1)
+        .where((part) => part.trim().isNotEmpty)
+        .toList();
+  }
+
+  void _handleScopedCommand({
+    required String input,
+    required String requiredScope,
+    required ImMessage Function() createResult,
+  }) {
+    _messageController.clear();
+    _appendMessage(
+      _repository.createTextMessage(
+        conversationId: _selectedConversationId,
+        text: input,
+      ),
+    );
+
+    if (!_grantedScopes.contains(requiredScope)) {
+      _appendMessage(
+        ImMessage(
+          id: 'scope_denied_${DateTime.now().microsecondsSinceEpoch}',
+          conversationId: _selectedConversationId,
+          senderName: '系统',
+          sentAt: '现在',
+          kind: ImMessageKind.system,
+          text: '缺少 $requiredScope 权限。请先输入 /request_scope 提交申请，本 Demo 会默认通过。',
+        ),
+      );
+      return;
+    }
+
+    _appendMessage(createResult());
   }
 
   void _insertCommand(String command) {
@@ -272,7 +339,7 @@ class _ImDemoPageState extends State<ImDemoPage> {
   void _openAppManager() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => ImAppManagerPage(manifest: _repository.getManifest()),
+        builder: (_) => ImAppManagerPage(manifest: _currentManifest()),
       ),
     );
   }
@@ -282,8 +349,49 @@ class _ImDemoPageState extends State<ImDemoPage> {
       context: context,
       useSafeArea: true,
       builder: (context) {
-        return _ScopeRequestSheet(manifest: _repository.getManifest());
+        return _ScopeRequestSheet(
+          manifest: _currentManifest(),
+          onApprove: _approvePendingScopes,
+        );
       },
+    );
+  }
+
+  ImAppManifest _currentManifest() {
+    final manifest = _repository.getManifest();
+    return ImAppManifest(
+      appId: manifest.appId,
+      name: manifest.name,
+      description: manifest.description,
+      installed: manifest.installed,
+      scopes: [
+        for (final scope in manifest.scopes)
+          ImScope(
+            id: scope.id,
+            name: scope.name,
+            description: scope.description,
+            granted: _grantedScopes.contains(scope.id),
+          ),
+      ],
+      commands: manifest.commands,
+      cardTemplates: manifest.cardTemplates,
+    );
+  }
+
+  void _approvePendingScopes(List<ImScope> pendingScopes) {
+    setState(() {
+      _grantedScopes.addAll(pendingScopes.map((scope) => scope.id));
+    });
+    _appendMessage(
+      ImMessage(
+        id: 'scope_approved_${DateTime.now().microsecondsSinceEpoch}',
+        conversationId: _selectedConversationId,
+        senderName: '系统',
+        sentAt: '现在',
+        kind: ImMessageKind.system,
+        text:
+            '权限申请已自动通过：${pendingScopes.map((scope) => scope.name).join('、')}。现在可以测试 /workflow 和 /invite。',
+      ),
     );
   }
 
@@ -1268,9 +1376,10 @@ class ImAppManagerPage extends StatelessWidget {
 }
 
 class _ScopeRequestSheet extends StatelessWidget {
-  const _ScopeRequestSheet({required this.manifest});
+  const _ScopeRequestSheet({required this.manifest, required this.onApprove});
 
   final ImAppManifest manifest;
+  final ValueChanged<List<ImScope>> onApprove;
 
   @override
   Widget build(BuildContext context) {
@@ -1307,11 +1416,12 @@ class _ScopeRequestSheet extends StatelessWidget {
             child: FilledButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已提交权限申请，等待频道管理员审批')),
-                );
+                onApprove(pendingScopes);
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('权限申请已自动通过')));
               },
-              child: const Text('提交申请'),
+              child: const Text('提交申请并通过'),
             ),
           ),
         ],

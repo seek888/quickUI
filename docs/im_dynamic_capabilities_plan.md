@@ -1,5 +1,7 @@
 # IM 动态能力开放规划
 
+完整产品和技术方案见 `docs/im_dynamic_platform_design.md`。
+
 ## 1. 目标
 
 在社交客户端中增加类似 Slack/Discord 的 IM 扩展能力，但不开放任意代码执行。平台提供固定、安全、可审计的 IM 核心能力，用户通过配置、命令、消息卡片、表单和工作流构建自己的功能。
@@ -16,6 +18,7 @@
 - 查看频道应用安装、命令、Scope 和卡片模板。
 - 模拟 `/request_scope` 权限申请。
 - 模拟 `/weather` 调用公开天气 API 并生成消息卡片。
+- 模拟权限申请自动通过后使用 `/workflow` 和 `/invite` 测试工作流与邀请能力。
 
 ## 2. 参考 Slack/Discord 的方式
 
@@ -136,6 +139,8 @@ flowchart TD
 - `/campaign` 命令生成活动卡片。
 - `/poll` 命令生成投票卡片。
 - `/weather` 命令调用 Open-Meteo 天气 API 并生成天气数据卡片。
+- `/workflow` 命令在获得 `workflow.start` 后生成工作流状态卡片。
+- `/invite` 命令在获得 `member.invite` 后模拟邀请成员进频道。
 - 点击卡片打开动态 Stac 表单。
 - 分享卡片。
 - 表单提交走平台 action。
@@ -143,7 +148,15 @@ flowchart TD
 - 卡片可以查看对应 JSON 模板。
 - 频道工具可以查看应用安装管理。
 - 应用管理页展示 Manifest、Scope、命令和卡片模板。
-- `/request_scope` 可以打开权限申请弹窗。
+- `/request_scope` 可以打开权限申请弹窗，提交后本地 Demo 默认审批通过。
+
+权限测试流程：
+
+1. 直接输入 `/workflow` 或 `/invite 张三 李四`，客户端会提示缺少对应 scope。
+2. 输入 `/request_scope` 打开权限申请。
+3. 点击“提交申请并通过”，Demo 会把待申请权限标记为已授权。
+4. 再次输入 `/workflow`，会生成工作流状态卡片。
+5. 再次输入 `/invite 张三 李四`，会模拟邀请成员并回写系统消息。
 
 ### 网络 API 能力 Demo
 
@@ -209,6 +222,8 @@ flowchart TD
 - `/campaign` 创建活动。
 - `/poll` 发起投票。
 - `/weather` 查询天气并发送卡片。
+- `/workflow` 启动工作流。
+- `/invite` 邀请成员。
 - `/task` 创建任务。
 - `/feedback` 提交反馈。
 - `/request_scope` 申请能力。

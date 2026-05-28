@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "template": "workflow_card",
+  "name": "工作流状态卡片",
+  "requiredScopes": ["workflow.start", "message.send_card"],
+  "workflow": {
+    "id": "campaign_publish_review",
+    "trigger": "slash_command",
+    "command": "/workflow",
+    "steps": [
+      {
+        "id": "validate_campaign",
+        "name": "校验活动信息",
+        "type": "rule_check"
+      },
+      {
+        "id": "notify_admin",
+        "name": "通知频道管理员",
+        "type": "message.send_card"
+      },
+      {
+        "id": "create_todo",
+        "name": "生成审核待办",
+        "type": "task.create"
+      },
+      {
+        "id": "write_back",
+        "name": "回写状态卡片",
+        "type": "message.update_card"
+      }
+    ]
+  },
+  "layout": {
+    "type": "messageCard",
+    "header": {
+      "title": "{{workflow.title}}",
+      "subtitle": "自动化工作流"
+    },
+    "body": [
+      {
+        "type": "text",
+        "value": "状态：{{workflow.status}}"
+      },
+      {
+        "type": "timeline",
+        "items": "{{workflow.steps}}"
+      }
+    ],
+    "actions": [
+      {
+        "label": "推进流程",
+        "actionType": "platform",
+        "capability": "workflow.advance"
+      },
+      {
+        "label": "分享",
+        "actionType": "platform",
+        "capability": "message.share_card"
+      }
+    ]
+  }
+}

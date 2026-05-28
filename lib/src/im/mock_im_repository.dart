@@ -78,7 +78,8 @@ class MockImRepository {
         senderName: 'QuickUI Bot',
         sentAt: '10:00',
         kind: ImMessageKind.text,
-        text: '输入 /campaign、/poll 或 /request_scope 试试。',
+        text:
+            '输入 /campaign、/poll、/weather、/request_scope、/workflow 或 /invite 试试。',
       ),
     ],
     'design_group': [
@@ -120,6 +121,16 @@ class MockImRepository {
       name: '/weather',
       description: '调用公开天气 API 并生成数据卡片',
       scope: 'network.request',
+    ),
+    ImCommand(
+      name: '/workflow',
+      description: '启动活动发布工作流',
+      scope: 'workflow.start',
+    ),
+    ImCommand(
+      name: '/invite',
+      description: '邀请成员加入当前频道',
+      scope: 'member.invite',
     ),
     ImCommand(
       name: '/request_scope',
@@ -259,6 +270,45 @@ class MockImRepository {
     );
   }
 
+  ImMessage createWorkflowCard({required String conversationId}) {
+    return ImMessage(
+      id: 'workflow_${DateTime.now().microsecondsSinceEpoch}',
+      conversationId: conversationId,
+      senderName: 'QuickUI Bot',
+      sentAt: '现在',
+      kind: ImMessageKind.card,
+      card: const ImCard(
+        template: 'workflow_card',
+        title: '活动发布工作流已启动',
+        subtitle: '已模拟执行：校验活动信息、通知频道管理员、生成待办和回写状态卡片。',
+        primaryAction: '推进流程',
+        secondaryAction: '分享',
+        configAsset: 'assets/stac/im/workflow_card.json',
+        formAsset: 'assets/stac/im/campaign_form.json',
+        payload: {
+          'workflowId': 'campaign_publish_review',
+          'status': 'running',
+          'scope': 'workflow.start',
+        },
+      ),
+    );
+  }
+
+  ImMessage createInviteResult({
+    required String conversationId,
+    required List<String> invitees,
+  }) {
+    final displayNames = invitees.isEmpty ? '内容运营、审核同学' : invitees.join('、');
+    return ImMessage(
+      id: 'invite_${DateTime.now().microsecondsSinceEpoch}',
+      conversationId: conversationId,
+      senderName: 'QuickUI Bot',
+      sentAt: '现在',
+      kind: ImMessageKind.system,
+      text: '已模拟邀请 $displayNames 加入当前频道，并发送入群欢迎卡片。',
+    );
+  }
+
   ImAppManifest getManifest() {
     return ImAppManifest(
       appId: 'quickui_creator_bot',
@@ -322,6 +372,12 @@ class MockImRepository {
           name: '天气数据卡片',
           description: '通过公开天气 API 获取数据后渲染到消息卡片。',
           configAsset: 'assets/stac/im/weather_card.json',
+        ),
+        ImCardTemplate(
+          id: 'workflow_card',
+          name: '工作流状态卡片',
+          description: '用于展示自动化流程的状态、步骤和后续操作。',
+          configAsset: 'assets/stac/im/workflow_card.json',
         ),
       ],
     );

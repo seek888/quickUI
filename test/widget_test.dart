@@ -129,6 +129,85 @@ void main() {
     expect(find.text('启动工作流'), findsOneWidget);
   });
 
+  testWidgets('approves scopes and runs workflow command', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const QuickUiDemoApp());
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.enterText(
+      find.byKey(const ValueKey('im-message-composer')),
+      '/workflow',
+    );
+    await tester.tap(find.byIcon(Icons.send_outlined));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    var composer = tester.widget<TextField>(
+      find.byKey(const ValueKey('im-message-composer')),
+    );
+    expect(composer.controller?.text, isEmpty);
+
+    await tester.enterText(
+      find.byKey(const ValueKey('im-message-composer')),
+      '/request_scope',
+    );
+    await tester.tap(find.byIcon(Icons.send_outlined));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('提交申请并通过'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.textContaining('权限申请已自动通过'), findsWidgets);
+
+    await tester.enterText(
+      find.byKey(const ValueKey('im-message-composer')),
+      '/workflow',
+    );
+    await tester.tap(find.byIcon(Icons.send_outlined));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.drag(find.byType(ListView).last, const Offset(0, -360));
+    await tester.pumpAndSettle();
+
+    expect(find.text('活动发布工作流已启动'), findsOneWidget);
+  });
+
+  testWidgets('approves scopes and runs invite command', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const QuickUiDemoApp());
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.enterText(
+      find.byKey(const ValueKey('im-message-composer')),
+      '/request_scope',
+    );
+    await tester.tap(find.byIcon(Icons.send_outlined));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('提交申请并通过'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.enterText(
+      find.byKey(const ValueKey('im-message-composer')),
+      '/invite 张三 李四',
+    );
+    await tester.tap(find.byIcon(Icons.send_outlined));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.drag(find.byType(ListView).last, const Offset(0, -360));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('已模拟邀请 张三、李四'), findsOneWidget);
+  });
+
   test('mock IM repository creates campaign command card', () {
     final repository = MockImRepository();
     final message = repository.createCommandResult(
@@ -152,6 +231,10 @@ void main() {
     );
     expect(
       manifest.cardTemplates.any((template) => template.id == 'weather_card'),
+      isTrue,
+    );
+    expect(
+      manifest.cardTemplates.any((template) => template.id == 'workflow_card'),
       isTrue,
     );
   });
@@ -182,5 +265,22 @@ void main() {
     expect(message.kind, ImMessageKind.card);
     expect(message.card?.template, 'weather_card');
     expect(message.card?.payload['source'], 'open_meteo');
+  });
+
+  test('mock IM repository creates workflow and invite results', () {
+    final repository = MockImRepository();
+
+    final workflow = repository.createWorkflowCard(
+      conversationId: 'creator_ops',
+    );
+    final invite = repository.createInviteResult(
+      conversationId: 'creator_ops',
+      invitees: const ['张三', '李四'],
+    );
+
+    expect(workflow.kind, ImMessageKind.card);
+    expect(workflow.card?.template, 'workflow_card');
+    expect(invite.kind, ImMessageKind.system);
+    expect(invite.text, contains('张三、李四'));
   });
 }

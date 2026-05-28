@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "1.0",
+  "template": "weather_card",
+  "name": "天气数据卡片",
+  "requiredScopes": ["network.request", "message.send_card"],
+  "dataSource": {
+    "type": "https",
+    "provider": "open_meteo",
+    "geocodingEndpoint": "https://geocoding-api.open-meteo.com/v1/search",
+    "forecastEndpoint": "https://api.open-meteo.com/v1/forecast",
+    "method": "GET",
+    "auth": "none",
+    "sampleQuery": {
+      "city": "Shanghai",
+      "current_weather": true,
+      "timezone": "auto"
+    }
+  },
+  "mapping": {
+    "title": "{{weather.cityName}}天气 · {{weather.temperature}}°C",
+    "subtitle": "{{weather.conditionLabel}}，风速 {{weather.windSpeed}} km/h",
+    "payload": {
+      "city": "{{weather.cityName}}",
+      "country": "{{weather.country}}",
+      "latitude": "{{weather.latitude}}",
+      "longitude": "{{weather.longitude}}",
+      "observedAt": "{{weather.observedAt}}"
+    }
+  },
+  "layout": {
+    "type": "messageCard",
+    "header": {
+      "title": "{{weather.cityName}}天气",
+      "subtitle": "Open-Meteo 实时天气数据"
+    },
+    "body": [
+      {
+        "type": "metric",
+        "label": "温度",
+        "value": "{{weather.temperature}}°C"
+      },
+      {
+        "type": "text",
+        "value": "{{weather.conditionLabel}} · 风速 {{weather.windSpeed}} km/h"
+      },
+      {
+        "type": "text",
+        "value": "观测时间：{{weather.observedAt}}"
+      }
+    ],
+    "actions": [
+      {
+        "label": "刷新天气",
+        "actionType": "platform",
+        "capability": "network.fetch_weather"
+      },
+      {
+        "label": "分享",
+        "actionType": "platform",
+        "capability": "message.share_card"
+      }
+    ]
+  }
+}

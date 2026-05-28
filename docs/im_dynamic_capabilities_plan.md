@@ -15,6 +15,7 @@
 - 查看卡片 JSON 配置。
 - 查看频道应用安装、命令、Scope 和卡片模板。
 - 模拟 `/request_scope` 权限申请。
+- 模拟 `/weather` 调用公开天气 API 并生成消息卡片。
 
 ## 2. 参考 Slack/Discord 的方式
 
@@ -91,6 +92,7 @@ flowchart TD
 - 动态表单 Modal。
 - 点击按钮触发工作流。
 - 表单提交后发送卡片。
+- 受控网络数据源调用，如天气、内容、榜单和 CRM 查询。
 
 ### 权限控制层
 
@@ -104,6 +106,7 @@ flowchart TD
 - `command.register`
 - `workflow.start`
 - `member.invite`
+- `network.request`
 
 ## 4. 当前 POC 已实现
 
@@ -120,6 +123,7 @@ flowchart TD
 - `assets/stac/im/campaign_card.json`
 - `assets/stac/im/poll_card.json`
 - `assets/stac/im/article_card.json`
+- `assets/stac/im/weather_card.json`
 
 已模拟能力：
 
@@ -131,6 +135,7 @@ flowchart TD
 - 动态消息卡片。
 - `/campaign` 命令生成活动卡片。
 - `/poll` 命令生成投票卡片。
+- `/weather` 命令调用 Open-Meteo 天气 API 并生成天气数据卡片。
 - 点击卡片打开动态 Stac 表单。
 - 分享卡片。
 - 表单提交走平台 action。
@@ -139,6 +144,37 @@ flowchart TD
 - 频道工具可以查看应用安装管理。
 - 应用管理页展示 Manifest、Scope、命令和卡片模板。
 - `/request_scope` 可以打开权限申请弹窗。
+
+### 网络 API 能力 Demo
+
+当前接入的天气数据源：
+
+- 数据源：Open-Meteo。
+- 认证方式：无需 API key。
+- 协议：HTTPS GET + JSON。
+- 城市查询：`https://geocoding-api.open-meteo.com/v1/search`。
+- 天气查询：`https://api.open-meteo.com/v1/forecast`。
+- Demo 命令：`/weather Shanghai`，不传城市时默认查询 Shanghai。
+
+客户端流程：
+
+1. 用户在 IM 输入 `/weather Shanghai`。
+2. 客户端通过受控 `WeatherApiService` 查询城市经纬度。
+3. 客户端再用经纬度查询当前天气。
+4. 查询结果被转换为 `weather_card` 消息卡片。
+5. 用户可查看天气卡片配置，也可点击“刷新天气”重新请求数据。
+
+这个 Demo 表达的是平台能力，不是让第三方在客户端执行任意代码。后续产品化时，应把它抽象为 `dataSource` 配置：
+
+- `endpoint`：只允许 HTTPS。
+- `method`：早期只开放 GET。
+- `auth`：支持 none、平台代理 token、用户授权 token。
+- `query`：受控参数模板。
+- `mapping`：把 JSON 字段映射到卡片字段。
+- `cachePolicy`：定义 TTL、失败降级和刷新策略。
+- `requiredScopes`：例如 `network.request` 和 `message.send_card`。
+
+生产环境建议由平台服务端代理第三方 API，而不是让客户端直接暴露第三方密钥或复杂鉴权逻辑。客户端直连适合当前演示和无密钥公开 API。
 
 ## 5. 可以开放给用户的 IM 功能
 
@@ -160,6 +196,7 @@ flowchart TD
 - 活动卡片。
 - 文章卡片。
 - 投票卡片。
+- 天气数据卡片。
 - 报名卡片。
 - 审批卡片。
 - 任务卡片。
@@ -171,6 +208,7 @@ flowchart TD
 
 - `/campaign` 创建活动。
 - `/poll` 发起投票。
+- `/weather` 查询天气并发送卡片。
 - `/task` 创建任务。
 - `/feedback` 提交反馈。
 - `/request_scope` 申请能力。

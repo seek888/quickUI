@@ -6,6 +6,7 @@ import 'package:stac/stac.dart';
 
 import 'im_models.dart';
 import 'mock_im_repository.dart';
+import 'weather_api_service.dart';
 
 class ImDemoPage extends StatefulWidget {
   const ImDemoPage({super.key});
@@ -16,6 +17,7 @@ class ImDemoPage extends StatefulWidget {
 
 class _ImDemoPageState extends State<ImDemoPage> {
   final MockImRepository _repository = MockImRepository();
+  final WeatherApiService _weatherApiService = WeatherApiService();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _messageScrollController = ScrollController();
 
@@ -47,6 +49,35 @@ class _ImDemoPageState extends State<ImDemoPage> {
     });
   }
 
+  void _openConversation(String id) {
+    _selectConversation(id);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => StatefulBuilder(
+          builder: (context, setRouteState) {
+            return _ConversationChatPage(
+              conversation: _selectedConversation,
+              messages: _messages,
+              scrollController: _messageScrollController,
+              controller: _messageController,
+              onSend: () {
+                _sendInput();
+                setRouteState(() {});
+              },
+              onOpenCard: (card) async {
+                await _openDynamicForm(card);
+                setRouteState(() {});
+              },
+              onViewCardConfig: _openCardConfig,
+              onShareCard: _shareCard,
+              onOpenAppManager: _openAppManager,
+            );
+          },
+        ),
+      ),
+    );
+  }
+
   void _sendInput() {
     final input = _messageController.text.trim();
     if (input.isEmpty) return;
@@ -54,6 +85,19 @@ class _ImDemoPageState extends State<ImDemoPage> {
     if (input.startsWith('/request_scope')) {
       _messageController.clear();
       _showScopeRequestSheet();
+      return;
+    }
+
+    if (input.startsWith('/weather')) {
+      final cityName = _parseWeatherCity(input);
+      _messageController.clear();
+      _appendMessage(
+        _repository.createTextMessage(
+          conversationId: _selectedConversationId,
+          text: input,
+        ),
+      );
+      _fetchAndAppendWeather(cityName, conversationId: _selectedConversationId);
       return;
     }
 
@@ -74,14 +118,12 @@ class _ImDemoPageState extends State<ImDemoPage> {
       ];
       _messageController.clear();
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_messageScrollController.hasClients) return;
-      _messageScrollController.animateTo(
-        _messageScrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
-      );
-    });
+    _scrollToBottom();
+  }
+
+  String _parseWeatherCity(String input) {
+    final parts = input.split(RegExp(r'\s+')).where((part) => part.isNotEmpty);
+    return parts.length >= 2 ? parts.skip(1).join(' ') : 'Shanghai';
   }
 
   void _insertCommand(String command) {
@@ -92,6 +134,15 @@ class _ImDemoPageState extends State<ImDemoPage> {
   }
 
   Future<void> _openDynamicForm(ImCard card) async {
+    if (card.template == 'weather_card') {
+      final cityName = card.payload['city'] ?? 'Shanghai';
+      await _fetchAndAppendWeather(
+        cityName,
+        conversationId: _selectedConversationId,
+      );
+      return;
+    }
+
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -121,6 +172,44 @@ class _ImDemoPageState extends State<ImDemoPage> {
         conversationId: _selectedConversationId,
       ),
     );
+  }
+
+  Future<void> _fetchAndAppendWeather(
+    String cityName, {
+    required String conversationId,
+  }) async {
+    _appendMessage(
+      ImMessage(
+        id: 'weather_loading_${DateTime.now().microsecondsSinceEpoch}',
+        conversationId: conversationId,
+        senderName: '系统',
+        sentAt: '现在',
+        kind: ImMessageKind.system,
+        text: '正在通过 Open-Meteo 获取 $cityName 天气...',
+      ),
+    );
+    try {
+      final weather = await _weatherApiService.fetchWeatherForCity(cityName);
+      if (!mounted) return;
+      _appendMessage(
+        _repository.createWeatherCard(
+          conversationId: conversationId,
+          weather: weather,
+        ),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      _appendMessage(
+        ImMessage(
+          id: 'weather_error_${DateTime.now().microsecondsSinceEpoch}',
+          conversationId: conversationId,
+          senderName: '系统',
+          sentAt: '现在',
+          kind: ImMessageKind.system,
+          text: '天气接口调用失败: $error',
+        ),
+      );
+    }
   }
 
   void _appendMessage(ImMessage message) {
@@ -216,37 +305,223 @@ class _ImDemoPageState extends State<ImDemoPage> {
           );
         }
 
-        return Column(
-          children: [
-            SizedBox(
-              height: 164,
-              child: _ConversationList(
-                conversations: _conversations,
-                selectedConversationId: _selectedConversationId,
-                commands: _repository.getCommands(),
-                onSelected: _selectConversation,
-                onCommandSelected: _insertCommand,
-                compact: true,
-              ),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: _ChatRoom(
-                conversation: _selectedConversation,
-                messages: _messages,
-                scrollController: _messageScrollController,
-                controller: _messageController,
-                onSend: _sendInput,
-                onOpenCard: _openDynamicForm,
-                onViewCardConfig: _openCardConfig,
-                onShareCard: _shareCard,
-                onOpenAppManager: _openAppManager,
-              ),
-            ),
-          ],
+        return _ConversationInbox(
+          conversations: _conversations,
+          commands: _repository.getCommands(),
+          onConversationSelected: _openConversation,
+          onCommandSelected: (command) {
+            _insertCommand(command);
+            _openConversation(_selectedConversationId);
+          },
         );
       },
     );
+  }
+}
+
+class _ConversationChatPage extends StatelessWidget {
+  const _ConversationChatPage({
+    required this.conversation,
+    required this.messages,
+    required this.scrollController,
+    required this.controller,
+    required this.onSend,
+    required this.onOpenCard,
+    required this.onViewCardConfig,
+    required this.onShareCard,
+    required this.onOpenAppManager,
+  });
+
+  final ImConversation conversation;
+  final List<ImMessage> messages;
+  final ScrollController scrollController;
+  final TextEditingController controller;
+  final VoidCallback onSend;
+  final ValueChanged<ImCard> onOpenCard;
+  final ValueChanged<ImCard> onViewCardConfig;
+  final ValueChanged<ImCard> onShareCard;
+  final VoidCallback onOpenAppManager;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: _ChatRoom(
+          conversation: conversation,
+          messages: messages,
+          scrollController: scrollController,
+          controller: controller,
+          onSend: onSend,
+          onOpenCard: onOpenCard,
+          onViewCardConfig: onViewCardConfig,
+          onShareCard: onShareCard,
+          onOpenAppManager: onOpenAppManager,
+          showBackButton: true,
+        ),
+      ),
+    );
+  }
+}
+
+class _ConversationInbox extends StatelessWidget {
+  const _ConversationInbox({
+    required this.conversations,
+    required this.commands,
+    required this.onConversationSelected,
+    required this.onCommandSelected,
+  });
+
+  final List<ImConversation> conversations;
+  final List<ImCommand> commands;
+  final ValueChanged<String> onConversationSelected;
+  final ValueChanged<String> onCommandSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(color: Color(0xFFF8FAFC)),
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('消息', style: Theme.of(context).textTheme.titleLarge),
+                  const SizedBox(height: 10),
+                  TextField(
+                    readOnly: true,
+                    decoration: InputDecoration(
+                      hintText: '搜索会话、频道或 Bot',
+                      prefixIcon: const Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SliverList.separated(
+            itemCount: conversations.length,
+            separatorBuilder: (_, _) =>
+                const Divider(height: 1, indent: 72, color: Color(0xFFE5E7EB)),
+            itemBuilder: (context, index) {
+              final conversation = conversations[index];
+              return _InboxConversationTile(
+                conversation: conversation,
+                onTap: () => onConversationSelected(conversation.id),
+              );
+            },
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 18, 16, 8),
+              child: Text(
+                '快捷命令',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+          ),
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+            sliver: SliverList.builder(
+              itemCount: commands.length,
+              itemBuilder: (context, index) {
+                final command = commands[index];
+                return _CommandTile(command: command, onTap: onCommandSelected);
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InboxConversationTile extends StatelessWidget {
+  const _InboxConversationTile({
+    required this.conversation,
+    required this.onTap,
+  });
+
+  final ImConversation conversation;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: CircleAvatar(
+          radius: 24,
+          backgroundColor: const Color(0xFFE2E8F0),
+          child: Text(
+            conversation.avatarText,
+            style: const TextStyle(
+              color: Color(0xFF334155),
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                conversation.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              _conversationTime(conversation),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: const Color(0xFF94A3B8)),
+            ),
+          ],
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            '${_typeLabel(conversation.type)} · ${conversation.description}',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        trailing: conversation.unreadCount > 0
+            ? Badge(label: Text('${conversation.unreadCount}'))
+            : const Icon(Icons.chevron_right, color: Color(0xFF94A3B8)),
+        onTap: onTap,
+      ),
+    );
+  }
+
+  String _conversationTime(ImConversation conversation) {
+    return switch (conversation.id) {
+      'creator_ops' => '09:35',
+      'platform_bot' => '10:00',
+      'design_group' => '11:20',
+      _ => '现在',
+    };
+  }
+
+  String _typeLabel(ImConversationType type) {
+    return switch (type) {
+      ImConversationType.direct => '单聊',
+      ImConversationType.group => '群聊',
+      ImConversationType.channel => '频道',
+      ImConversationType.bot => 'Bot',
+    };
   }
 }
 
@@ -257,7 +532,6 @@ class _ConversationList extends StatelessWidget {
     required this.commands,
     required this.onSelected,
     required this.onCommandSelected,
-    this.compact = false,
   });
 
   final List<ImConversation> conversations;
@@ -265,39 +539,32 @@ class _ConversationList extends StatelessWidget {
   final List<ImCommand> commands;
   final ValueChanged<String> onSelected;
   final ValueChanged<String> onCommandSelected;
-  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final content = ListView(
-      scrollDirection: compact ? Axis.horizontal : Axis.vertical,
       padding: const EdgeInsets.all(12),
       children: [
-        if (!compact) ...[
-          Text('IM 工作台', style: Theme.of(context).textTheme.titleMedium),
-          const SizedBox(height: 4),
-          Text(
-            '模拟 Slack/Discord 风格：频道、Bot、命令和动态卡片。',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: const Color(0xFF64748B)),
-          ),
-          const SizedBox(height: 12),
-        ],
+        Text('IM 工作台', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 4),
+        Text(
+          '模拟 Slack/Discord 风格：频道、Bot、命令和动态卡片。',
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: const Color(0xFF64748B)),
+        ),
+        const SizedBox(height: 12),
         for (final conversation in conversations)
           _ConversationTile(
             conversation: conversation,
             selected: conversation.id == selectedConversationId,
-            compact: compact,
             onTap: () => onSelected(conversation.id),
           ),
-        if (!compact) ...[
-          const SizedBox(height: 16),
-          Text('可配置命令', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          for (final command in commands)
-            _CommandTile(command: command, onTap: onCommandSelected),
-        ],
+        const SizedBox(height: 16),
+        Text('可配置命令', style: Theme.of(context).textTheme.titleSmall),
+        const SizedBox(height: 8),
+        for (final command in commands)
+          _CommandTile(command: command, onTap: onCommandSelected),
       ],
     );
 
@@ -312,21 +579,18 @@ class _ConversationTile extends StatelessWidget {
   const _ConversationTile({
     required this.conversation,
     required this.selected,
-    required this.compact,
     required this.onTap,
   });
 
   final ImConversation conversation;
   final bool selected;
-  final bool compact;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final tile = Container(
-      width: compact ? 260 : null,
-      margin: EdgeInsets.only(right: compact ? 10 : 0, bottom: compact ? 0 : 8),
+      margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
         color: selected ? colorScheme.primaryContainer : Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -406,6 +670,7 @@ class _ChatRoom extends StatelessWidget {
     required this.onViewCardConfig,
     required this.onShareCard,
     required this.onOpenAppManager,
+    this.showBackButton = false,
   });
 
   final ImConversation conversation;
@@ -417,6 +682,7 @@ class _ChatRoom extends StatelessWidget {
   final ValueChanged<ImCard> onViewCardConfig;
   final ValueChanged<ImCard> onShareCard;
   final VoidCallback onOpenAppManager;
+  final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -425,6 +691,7 @@ class _ChatRoom extends StatelessWidget {
         _ChatHeader(
           conversation: conversation,
           onOpenAppManager: onOpenAppManager,
+          showBackButton: showBackButton,
         ),
         const Divider(height: 1),
         Expanded(
@@ -452,10 +719,12 @@ class _ChatHeader extends StatelessWidget {
   const _ChatHeader({
     required this.conversation,
     required this.onOpenAppManager,
+    required this.showBackButton,
   });
 
   final ImConversation conversation;
   final VoidCallback onOpenAppManager;
+  final bool showBackButton;
 
   @override
   Widget build(BuildContext context) {
@@ -465,6 +734,14 @@ class _ChatHeader extends StatelessWidget {
       color: Colors.white,
       child: Row(
         children: [
+          if (showBackButton) ...[
+            IconButton(
+              tooltip: '返回',
+              onPressed: () => Navigator.of(context).pop(),
+              icon: const Icon(Icons.arrow_back),
+            ),
+            const SizedBox(width: 4),
+          ],
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -718,7 +995,7 @@ class _MessageComposer extends StatelessWidget {
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => onSend(),
               decoration: InputDecoration(
-                hintText: '输入消息，或输入 /campaign 触发动态能力',
+                hintText: '输入消息，或输入 /weather Shanghai 调用天气 API',
                 filled: true,
                 fillColor: const Color(0xFFF8FAFC),
                 border: OutlineInputBorder(

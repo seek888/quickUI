@@ -1,4 +1,5 @@
 import 'im_models.dart';
+import 'weather_api_service.dart';
 
 class MockImRepository {
   final List<ImConversation> _conversations = const [
@@ -116,6 +117,11 @@ class MockImRepository {
       scope: 'message.card.write',
     ),
     ImCommand(
+      name: '/weather',
+      description: '调用公开天气 API 并生成数据卡片',
+      scope: 'network.request',
+    ),
+    ImCommand(
       name: '/request_scope',
       description: '申请群工具和卡片能力',
       scope: 'app.scope.request',
@@ -218,6 +224,41 @@ class MockImRepository {
     );
   }
 
+  ImMessage createWeatherCard({
+    required String conversationId,
+    required WeatherSnapshot weather,
+  }) {
+    return ImMessage(
+      id: 'weather_${DateTime.now().microsecondsSinceEpoch}',
+      conversationId: conversationId,
+      senderName: 'QuickUI Bot',
+      sentAt: '现在',
+      kind: ImMessageKind.card,
+      card: ImCard(
+        template: 'weather_card',
+        title:
+            '${weather.cityName}天气 · ${weather.temperature.toStringAsFixed(1)}°C',
+        subtitle:
+            '${weather.conditionLabel}，风速 ${weather.windSpeed.toStringAsFixed(1)} km/h · 数据源 Open-Meteo',
+        primaryAction: '刷新天气',
+        secondaryAction: '分享',
+        configAsset: 'assets/stac/im/weather_card.json',
+        formAsset: 'assets/stac/im/campaign_form.json',
+        payload: {
+          'city': weather.cityName,
+          'country': weather.country,
+          'latitude': weather.latitude.toStringAsFixed(4),
+          'longitude': weather.longitude.toStringAsFixed(4),
+          'temperature': weather.temperature.toStringAsFixed(1),
+          'windSpeed': weather.windSpeed.toStringAsFixed(1),
+          'weatherCode': '${weather.weatherCode}',
+          'observedAt': weather.observedAt,
+          'source': 'open_meteo',
+        },
+      ),
+    );
+  }
+
   ImAppManifest getManifest() {
     return ImAppManifest(
       appId: 'quickui_creator_bot',
@@ -242,6 +283,12 @@ class MockImRepository {
           name: '启动工作流',
           description: '允许表单提交后触发自动化流程。',
           granted: false,
+        ),
+        ImScope(
+          id: 'network.request',
+          name: '调用网络接口',
+          description: '允许应用通过受控数据源请求外部 HTTPS API。',
+          granted: true,
         ),
         ImScope(
           id: 'member.invite',
@@ -269,6 +316,12 @@ class MockImRepository {
           name: '文章卡片',
           description: '用于把内容分享到会话。',
           configAsset: 'assets/stac/im/article_card.json',
+        ),
+        ImCardTemplate(
+          id: 'weather_card',
+          name: '天气数据卡片',
+          description: '通过公开天气 API 获取数据后渲染到消息卡片。',
+          configAsset: 'assets/stac/im/weather_card.json',
         ),
       ],
     );
